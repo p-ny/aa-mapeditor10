@@ -59,10 +59,10 @@ fn main()->Result<()> {
     unsafe { std::env::remove_var("AA_PAK_OVERLAY"); }
     let args:Vec<_>=std::env::args().collect();
     ensure!(args.len()==3,"publish --prepare|--apply|--undo <transaction directory>");
-    let root=PathBuf::from("C:/Games/aadev");
+    let root=PathBuf::from("data/local");
     let tx=PathBuf::from(&args[2]).canonicalize()?;
     let home=root.join("publishes").canonicalize()?;
-    ensure!(tx.parent()==Some(home.as_path()),"transaction must be directly below C:/Games/aadev/publishes");
+    ensure!(tx.parent()==Some(home.as_path()),"transaction must be directly below data/local/publishes");
     let t=target(&root,&tx)?;
     let (undo,server_undo)=(tx.join("pak.undo"),tx.join("pak-server.undo"));
     match args[1].as_str(){

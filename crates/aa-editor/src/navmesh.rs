@@ -313,7 +313,7 @@ pub fn export(world: &str, edited: &HashMap<(i32, i32), Arc<CellHeights>>, serve
         (file.starts_with("netmission")&&file.ends_with(".bai")).then(||dir.to_string())
     }).collect();
     if !zone_dirs.is_empty(){
-        let xml_path=std::path::Path::new("C:/Games/aadev/zone-runtime/game/worlds").join(world).join("world.xml");
+        let xml_path=std::path::Path::new("data/local/zone-runtime/game/worlds").join(world).join("world.xml");
         let text=std::fs::read_to_string(&xml_path).with_context(||format!("zone navigation needs {}",xml_path.display()))?;
         let document=roxmltree::Document::parse(text.trim_start_matches('\u{feff}'))?;
         for dir in zone_dirs {

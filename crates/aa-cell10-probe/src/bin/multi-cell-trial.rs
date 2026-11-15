@@ -3,10 +3,10 @@ use std::{fs,path::PathBuf};
 use aa_world::heightmap::{CellHeights,GRID};
 #[path="../../../aa-editor/src/heightmap_write.rs"]mod heightmap_write;
 fn main()->Result<()> {
-    let root=PathBuf::from("C:/Games/aadev");let out=root.join("reports/multi-cell-trial");fs::create_dir_all(&out)?;
+    let root=PathBuf::from("data/local");let out=root.join("reports/multi-cell-trial");fs::create_dir_all(&out)?;
     if std::env::args().any(|a|a=="--covered-zone-case") {
         unsafe{std::env::remove_var("AA_PAK_OVERLAY");}
-        let pak=aa_pak::Pak::open("D:/dev/clients/AA-CN/game_pak")?;
+        let pak=aa_pak::Pak::open("client/game_pak")?;
         let verts=pak.read("worlds/instance_prologue/zone/300/vertsmission0.bai")?;
         let n=i32::from_le_bytes(verts[4..8].try_into()?) as usize;
         let f=|i:usize,k:usize|f32::from_le_bytes(verts[8+i*32+k*4..12+i*32+k*4].try_into().unwrap());

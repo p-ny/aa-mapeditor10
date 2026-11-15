@@ -4,9 +4,7 @@ use aa_world::placement::{load_cell_objects, parse_brush_dat, parse_object_dat};
 use aa_world::placement_write::{ObjectTree, SectorFile};
 fn fixture() -> (WorldObjects, ObjectPart) {
     assert!(
-        std::env::var("AA_PAK")
-            .unwrap_or_default()
-            .contains("AA-CN"),
+        std::env::var("AA_PAK").is_ok(),
         "run native transfer regressions against the original 10.x pak"
     );
     let mut objs = WorldObjects::default();

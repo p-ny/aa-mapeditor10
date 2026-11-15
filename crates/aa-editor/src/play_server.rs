@@ -12,7 +12,7 @@
 //!   server (`--pos` is local only), so the GM chat command `/move X Y Z` is typed through the client's scripted
 //!   keyboard (`--hud-key enter`, `--hud-type`, `--hud-key enter`), to the ground under the editor camera.
 //!
-//! Flags: `--client-exe <path>`, `--lane-dir <dir>` (default `D:/aaemu-wt/bevy`), `--lane-name <name>` (`bevy`),
+//! Flags: `--client-exe <path>`, `--lane-dir <dir>` (default `lane`), `--lane-name <name>` (`bevy`),
 //! `--lane-ports <login,game,stream>` (`27237,27239,27250`), `--play-account <name>` (`bevylive1`),
 //! `--play-character <name>`, `--play-password-file <file>`, `--client-arg "<args>"` (repeatable, split at spaces and passed to the client; a bare `--shot` would clash with the editor's own),
 //! `--dry-run` (the restart only logs its command), `--play-server` (open the window at start),
@@ -143,8 +143,8 @@ fn flag_value(name: &str) -> Option<String> {
 fn default_client_exe(root: &Path) -> PathBuf {
     // a release build of this branch's client (it must have the pak overlay: it is newer than the editor's)
     for p in [
-        "C:/Users/messe/aa-editor-target/release/aa-client.exe",
-        "C:/Users/messe/aa-editor-target/debug/aa-client.exe",
+        "target/release/aa-client.exe",
+        "target/debug/aa-client.exe",
     ] {
         if Path::new(p).is_file() {
             return PathBuf::from(p);
@@ -158,7 +158,7 @@ pub fn plugin(app: &mut App) {
         app.init_resource::<TenXPanel>().add_systems(EguiPrimaryContextPass, tenx_panel);
         return;
     }
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let root = std::env::current_dir().unwrap_or_default();
     let ports = flag_value("--lane-ports")
         .and_then(|v| {
             let n: Vec<u16> = v.split(',').filter_map(|s| s.trim().parse().ok()).collect();
@@ -169,7 +169,7 @@ pub fn plugin(app: &mut App) {
     let state = PlayServer {
         open: std::env::args().any(|a| a == "--play-server"),
         client_exe: flag_value("--client-exe").map(PathBuf::from).unwrap_or_else(|| default_client_exe(&root)),
-        lane_dir: flag_value("--lane-dir").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("D:/aaemu-wt/bevy")),
+        lane_dir: flag_value("--lane-dir").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("lane")),
         lane_name: flag_value("--lane-name").unwrap_or_else(|| "bevy".into()),
         ports,
         account: flag_value("--play-account").unwrap_or_else(|| "bevylive1".into()),
@@ -322,7 +322,7 @@ fn launch_when_saved(
     };
     let overlay = absolute(&editor.paths.overlay);
     let args = client_args(&s, teleport);
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let root = std::env::current_dir().unwrap_or_default();
     info!("play on server: {} {} (AA_PAK_OVERLAY={})", s.client_exe.display(), args.join(" "), overlay.display());
     match Command::new(&s.client_exe)
         .args(&args)
@@ -499,7 +499,7 @@ mod tests {
         PlayServer {
             open: false,
             client_exe: PathBuf::from("aa-client.exe"),
-            lane_dir: PathBuf::from("D:/aaemu-wt/bevy"),
+            lane_dir: PathBuf::from("lane"),
             lane_name: "bevy".into(),
             ports: [27237, 27239, 27250],
             account: "bevylive1".into(),
@@ -521,9 +521,9 @@ mod tests {
 
     #[test]
     fn restart_is_the_documented_stop_then_start() {
-        let s = restart_script(Path::new("D:\\aaemu-wt\\bevy"));
-        assert_eq!(s, "cd \"D:/aaemu-wt/bevy\" && Scripts/live-stack.sh stop && Scripts/live-stack.sh start");
-        let line = restart_command_line(Path::new("D:/aaemu-wt/bevy"), "bevy", Path::new("x.log"));
+        let s = restart_script(Path::new("D:\\lanes\\bevy"));
+        assert_eq!(s, "cd \"D:/lanes/bevy\" && Scripts/live-stack.sh stop && Scripts/live-stack.sh start");
+        let line = restart_command_line(Path::new("D:/lanes/bevy"), "bevy", Path::new("x.log"));
         assert!(line.starts_with("AAEMU_LANE=bevy ") && line.ends_with("> \"x.log\" 2>&1"));
         assert!(!line.contains("| tail") && !line.contains(" sync"));
     }
@@ -579,7 +579,7 @@ fn tenx_panel(mut contexts:EguiContexts,editor:Res<Editor>,camera:Query<&Transfo
             let overlay=editor.paths.overlay.clone();let target=target.clone();panel.status=format!("Checking saved cells and navigation for {target}…");
             panel.job=Some(std::thread::spawn(move ||{
                 let mut cmd=Command::new("python.exe");
-                cmd.args(["C:/Games/aadev/tools/publish-cell.py","plan","--target",&target,"--overlay"]).arg(overlay);hidden(&mut cmd);
+                cmd.args(["data/local/tools/publish-cell.py","plan","--target",&target,"--overlay"]).arg(overlay);hidden(&mut cmd);
                 match cmd.output(){Ok(out)=>format!("{}{}",String::from_utf8_lossy(&out.stdout),String::from_utf8_lossy(&out.stderr)),Err(e)=>format!("Cannot start publish preview: {e}")}
             }));
         }
@@ -591,7 +591,7 @@ fn tenx_panel(mut contexts:EguiContexts,editor:Res<Editor>,camera:Query<&Transfo
                 let target=target.clone();panel.status="Exporting the client files of the latest publication…".into();
                 panel.job=Some(std::thread::spawn(move ||{
                     let mut cmd=Command::new("python.exe");
-                    cmd.args(["C:/Games/aadev/tools/export-client.py","--target",&target]);hidden(&mut cmd);
+                    cmd.args(["data/local/tools/export-client.py","--target",&target]);hidden(&mut cmd);
                     match cmd.output(){Ok(out)=>format!("{}{}",String::from_utf8_lossy(&out.stdout),String::from_utf8_lossy(&out.stderr)),Err(e)=>format!("Cannot export client files: {e}")}
                 }));
             }
@@ -605,7 +605,7 @@ fn tenx_panel(mut contexts:EguiContexts,editor:Res<Editor>,camera:Query<&Transfo
                 panel.status=format!("Starting native area for {world} at {xy}…");
                 panel.job=Some(std::thread::spawn(move ||{
                     let mut cmd=Command::new("python.exe");
-                    cmd.args(["C:/Games/aadev/tools/test_area.py","--world",&world,"--position",&xy,"--start","--plain"]);hidden(&mut cmd);
+                    cmd.args(["data/local/tools/test_area.py","--world",&world,"--position",&xy,"--start","--plain"]);hidden(&mut cmd);
                     match cmd.output(){Ok(out)=>format!("{}{}",String::from_utf8_lossy(&out.stdout),String::from_utf8_lossy(&out.stderr)),Err(e)=>format!("Cannot prepare native area: {e}")}
                 }));
             }
@@ -613,7 +613,7 @@ fn tenx_panel(mut contexts:EguiContexts,editor:Res<Editor>,camera:Query<&Transfo
         if lab {
             ui.small("Starts the zone host for this position. Use the test client to enter the area.");
             if ui.add_enabled(panel.job.is_none(),egui::Button::new("Start isolated original 10.x client")).clicked(){
-                let mut cmd=Command::new("powershell.exe");cmd.args(["-NoProfile","-ExecutionPolicy","Bypass","-File","C:/Games/aadev/Start-TestClient.ps1"]);hidden(&mut cmd);let _=cmd.spawn();
+                let mut cmd=Command::new("powershell.exe");cmd.args(["-NoProfile","-ExecutionPolicy","Bypass","-File","data/local/Start-TestClient.ps1"]);hidden(&mut cmd);let _=cmd.spawn();
             }
         }
         if !panel.status.is_empty(){egui::ScrollArea::vertical().max_height(160.0).show(ui,|ui|{ui.small(&panel.status);});}

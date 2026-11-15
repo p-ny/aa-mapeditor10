@@ -30,5 +30,6 @@ $a=@('--tenx','--publish-target','none','--read-only-db','--db',$db,'--world',$W
   '--housing-overlay',(Join-Path $save 'housing-overlay'),'--ground-catalog',(Join-Path $root 'data/ground_catalog.json'),'--level-doodad-overlay',(Join-Path $save 'level-doodad-overlay'))
 if($cfg['server_worlds']){$a+=@('--world-spawn-dir',(Join-Path $cfg['server_worlds'] $World))}
 if($Position){$a+=@('--pos',$Position)}
-& (Join-Path $root 'aa-editor.exe') @a
+Push-Location $save  # relative editor files (teleport bookmarks) go into the save folder
+try { & (Join-Path $root 'aa-editor.exe') @a } finally { Pop-Location }
 exit $LASTEXITCODE

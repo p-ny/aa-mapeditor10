@@ -1252,7 +1252,7 @@ mod tests {
 
     #[test]
     fn retail_files_load_and_a_single_edit_changes_only_its_entry() {
-        let source = Path::new("D:/aaemu-wt/bevy/rust/crates/aaemu-game/app/Data/Worlds/main_world");
+        let source = Path::new("server/Data/Worlds/main_world");
         if !source.join("npc_spawns.json").exists() {
             return;
         }

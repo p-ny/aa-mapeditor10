@@ -25,7 +25,7 @@ use crate::terrain_edit::Heights;
 use crate::{Editor, Mode};
 
 /// The bevy lane's runtime data folder.
-pub const DEFAULT_SERVER_DATA: &str = "D:/aaemu-live-bevy/rs-game/Data";
+pub const DEFAULT_SERVER_DATA: &str = "server/Data";
 /// Folder inside the server data folder that holds the exported client files.
 pub const OVERLAY_FOLDER: &str = "ClientOverlay";
 
@@ -51,8 +51,8 @@ impl ServerTerrain {
 }
 
 pub fn plugin(app: &mut App) {
-    let data_dir = crate::arg("--server-data").map(PathBuf::from).unwrap_or_else(|| PathBuf::from(if std::env::args().any(|a| a == "--tenx") { "C:/Games/aadev/server/game/Data" } else { DEFAULT_SERVER_DATA }));
-    let config = crate::arg("--server-config").map(PathBuf::from).unwrap_or_else(|| if std::env::args().any(|a| a == "--tenx") { PathBuf::from("C:/Games/aadev/server/game/Config.Local.json") } else { data_dir.join("../Config.Local.json") });
+    let data_dir = crate::arg("--server-data").map(PathBuf::from).unwrap_or_else(|| PathBuf::from(if std::env::args().any(|a| a == "--tenx") { "data/local/server/game/Data" } else { DEFAULT_SERVER_DATA }));
+    let config = crate::arg("--server-config").map(PathBuf::from).unwrap_or_else(|| if std::env::args().any(|a| a == "--tenx") { PathBuf::from("data/local/server/game/Config.Local.json") } else { data_dir.join("../Config.Local.json") });
     app.insert_resource(ServerTerrain { data_dir, config, register: true, status: String::new(), requested: false, done: false })
         .add_systems(Update, run_export)
         .add_systems(EguiPrimaryContextPass, window);
@@ -193,7 +193,7 @@ fn window(mut contexts: EguiContexts, editor: Res<Editor>, heights: Res<Heights>
     let ctx = contexts.ctx_mut()?;
     egui::Window::new("Server terrain").default_pos([320.0, 760.0]).default_width(330.0).show(ctx, |ui| {
         if crate::flag("--tenx") {
-            ui.label("Save terrain to the overlay, then use Publish Saved Cells.cmd. It updates the copied native client and C# navigation together; see C:/Games/aadev/README-10x.md.");
+            ui.label("Save terrain to the overlay, then use Publish Saved Cells.cmd. It updates the copied native client and C# navigation together; see data/local/README-10x.md.");
             return;
         }
         ui.small(format!("Server data: {}", st.data_dir.display()));

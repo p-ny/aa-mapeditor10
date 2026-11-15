@@ -1,8 +1,8 @@
 //! The game database (`compact.sqlite3`, plain SQLite) the AAEmu server loads at startup: the browser lists
 //! (NPCs, doodads, items, quests with their English names), model lookups for the previews, and the row editor.
 //!
-//! The editor opens the bevy lane's own copy (`D:/aaemu-live-bevy/rs-game/Data/compact.sqlite3`) read-write; the
-//! shared `D:/aaemu-live/...` copy is used by other lanes and is never written. Names live in `localized_texts`
+//! The editor opens the bevy lane's own copy (`server/Data/compact.sqlite3`) read-write; the
+//! shared `server/...` copy is used by other lanes and is never written. Names live in `localized_texts`
 //! (`tbl_name`, `tbl_column_name`, `idx`, one column per language).
 
 use std::collections::HashMap;
@@ -576,7 +576,7 @@ pub fn write_path_commands(conn: &mut Connection, before: &[PathCommand], now: &
 mod tests {
     use super::*;
 
-    const SHARED: &str = "D:/aaemu-live/rs-game/Data/compact.sqlite3";
+    const SHARED: &str = "server/Data/compact.sqlite3";
 
     #[test]
     fn lists_names_and_models_from_the_game_db() {

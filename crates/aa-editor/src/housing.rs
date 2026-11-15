@@ -336,7 +336,7 @@ pub fn write_file<'a>(entries: impl IntoIterator<Item = &'a Entry>, origin: (i32
 /// The zone file inside a client tree (pak overlay layout, no `game/`).
 /// 10.x keeps housing work beside the native data: shapes under `<housing overlay>/worlds/...`, rules in
 /// `housing.sqlite3` there. `housing.base.sqlite3` is the untouched copy publishing (`zones.py housing`) compares to.
-pub const TENX_OVERLAY_DEFAULT: &str = "C:/Games/aadev/housing-overlay";
+pub const TENX_OVERLAY_DEFAULT: &str = "data/local/housing-overlay";
 /// The 10.x housing overlay: `--housing-overlay`, else the lab's.
 pub fn tenx_overlay() -> String {
     crate::arg("--housing-overlay").unwrap_or_else(|| TENX_OVERLAY_DEFAULT.into())
@@ -2175,7 +2175,7 @@ mod tests {
 
     #[test]
     fn shared_database_rules_read() {
-        let path = Path::new("D:/aaemu-live/rs-game/Data/compact.sqlite3");
+        let path = Path::new("server/Data/compact.sqlite3");
         if !path.is_file() {
             return;
         }

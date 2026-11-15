@@ -4,7 +4,7 @@
 use std::collections::HashMap;
 use std::sync::OnceLock;
 
-const DEFAULT: &str = "C:/Games/aadev/data/ground_catalog.json";
+const DEFAULT: &str = "data/local/data/ground_catalog.json";
 
 /// `DetailMaterial` as a catalog key: lower case, forward slashes, without a leading `game/`.
 fn key(material: &str) -> String {

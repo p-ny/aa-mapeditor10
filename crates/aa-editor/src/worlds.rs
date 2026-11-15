@@ -17,7 +17,7 @@ use crate::world_objects::WorldObjects;
 use crate::{Editor, Request};
 
 /// The bevy lane's source tree, the default home of the server data files.
-pub const LANE_DATA: &str = "D:/aaemu-wt/bevy/rust/crates/aaemu-game/app/Data";
+pub const LANE_DATA: &str = "server/Data";
 
 /// Flags kept when restarting on another world (`--spawn-dir` / `--mirror` are mapped to it).
 const KEEP_VALUES: [&str; 14] = [
@@ -309,11 +309,11 @@ mod tests {
 
     #[test]
     fn tenx_world_switch_keeps_the_isolated_profile(){
-        let args=s(&["aa-editor","--tenx","--world","main_world","--db","C:/Games/aadev/test-data/compact.sqlite3","--server-data","C:/Games/aadev/server/game/Data","--server-config","C:/Games/aadev/server/game/Config.Local.json","--overlay","C:/Games/aadev/overlay","--spawn-dir","C:/Games/aadev/test-data/Worlds/main_world","--read-only-db"]);
+        let args=s(&["aa-editor","--tenx","--world","main_world","--db","data/local/test-data/compact.sqlite3","--server-data","data/local/server/game/Data","--server-config","data/local/server/game/Config.Local.json","--overlay","data/local/overlay","--spawn-dir","data/local/test-data/Worlds/main_world","--read-only-db"]);
         let out=relaunch_args(&args,"instance_prologue",None).join(" ").replace('\\',"/");
         assert!(out.contains("--tenx"));assert!(out.contains("--read-only-db"));
-        assert!(out.contains("C:/Games/aadev/test-data/Worlds/instance_prologue"));
-        assert!(out.contains("--server-config C:/Games/aadev/server/game/Config.Local.json"));
+        assert!(out.contains("data/local/test-data/Worlds/instance_prologue"));
+        assert!(out.contains("--server-config data/local/server/game/Config.Local.json"));
         assert!(!out.contains("D:/"));
     }
 

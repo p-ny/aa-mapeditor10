@@ -8,14 +8,14 @@ mod server_terrain {
         format!("{}worlds/{world}/cells/{:03}_{:03}/client/terrain/heightmap.dat",if server {"game/"}else{""},c.0,c.1)
     }
     pub fn backup(path:&std::path::Path)->anyhow::Result<bool> {
-        anyhow::ensure!(path.starts_with("C:/Games/aadev"),"navigation target outside test root");
+        anyhow::ensure!(path.starts_with("data/local"),"navigation target outside test root");
         let old=path.with_extension("bai.editor-orig");
         if path.exists() && !old.exists(){std::fs::copy(path,old)?;return Ok(true)}
         Ok(false)
     }
 }
 fn main()->Result<()> {
-    let root=PathBuf::from("C:/Games/aadev");
+    let root=PathBuf::from("data/local");
     let args:Vec<_>=std::env::args().collect();
     ensure!(args.len()==3,"nav <effective-overlay> <new-staging-directory>; use the publish workflow for runtime updates");
     let overlay=PathBuf::from(&args[1]);

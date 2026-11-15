@@ -101,7 +101,7 @@ pub struct Teleport {
 
 impl Default for Teleport {
     fn default() -> Self {
-        let bookmarks_file = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../data/local/editor/bookmarks.json");
+        let bookmarks_file = std::env::current_dir().unwrap_or_default().join("data/local/editor/bookmarks.json");
         let bookmarks = std::fs::read_to_string(&bookmarks_file).ok().and_then(|t| serde_json::from_str(&t).ok()).unwrap_or_default();
         Teleport {
             open: crate::flag("--teleport"),

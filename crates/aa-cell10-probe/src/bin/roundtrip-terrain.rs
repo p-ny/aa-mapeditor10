@@ -3,7 +3,7 @@ use aa_world::heightmap::{CellHeights,GRID};
 use std::{path::PathBuf,fs};
 #[path="../../../aa-editor/src/heightmap_write.rs"] mod heightmap_write;
 fn main()->Result<()> {
-    let root=PathBuf::from("C:/Games/aadev");
+    let root=PathBuf::from("data/local");
     let dir=root.join("reports/live-roundtrip");fs::create_dir_all(&dir)?;
     let source=root.join("overlay/worlds/main_world/cells/013_029/client/terrain/heightmap.dat");
     let before=fs::read(&source)?;

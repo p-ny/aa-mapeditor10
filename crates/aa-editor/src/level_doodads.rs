@@ -214,7 +214,7 @@ mod tests {
     /// Every cell file of the main server data parses and writes back byte for byte (skipped without that folder).
     #[test]
     fn real_cells_round_trip() {
-        let dir = std::path::Path::new("D:/aa/AA-CN/game/worlds/main_world/level_design/cells");
+        let dir = std::path::Path::new("server/game/worlds/main_world/level_design/cells");
         if !dir.is_dir() {
             return;
         }

@@ -419,7 +419,7 @@ mod tests {
 
     #[test]
     fn temple_priestess_wears_her_own_clothes() {
-        let path = "D:/aaemu-live/rs-game/Data/compact.sqlite3";
+        let path = "server/Data/compact.sqlite3";
         if !std::path::Path::new(path).exists() {
             return;
         }

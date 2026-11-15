@@ -19,10 +19,10 @@
 //! * `--no-fog`              start with the atmosphere fog off (View > Fog)
 //! * `--look yaw,pitch`      start camera direction in degrees (yaw 0 = north, clockwise; pitch -90 = straight down)
 //! * `--spawn-dir <dir>`     the server's `Data/Worlds/<world>` folder the spawn files are read from and saved to
-//!   (default: the bevy lane's source tree `D:/aaemu-wt/bevy/rust/crates/aaemu-game/app/Data/Worlds/<world>`)
+//!   (default: the bevy lane's source tree `server/Data/Worlds/<world>`)
 //! * `--mirror <dir>`        another folder that receives a copy of saved spawn files (repeatable; default: the lane's
-//!   runtime folder `D:/aaemu-live-bevy/rs-game/Data/Worlds/<world>` when it exists)
-//! * `--db <file>`           the game database to edit (default: the lane's `D:/aaemu-live-bevy/rs-game/Data/compact.sqlite3`)
+//!   runtime folder `server/Data/Worlds/<world>` when it exists)
+//! * `--db <file>`           the game database to edit (default: the lane's `server/Data/compact.sqlite3`)
 //! * `--read-only-db`        never write the database
 //! * `--overlay <dir>`       pak overlay folder for terrain saves (default `data/local/editor/overlay`)
 //! * `--select <unit_id>`    select the first spawn of this NPC / doodad template near the start (for screenshots)
@@ -35,9 +35,9 @@
 //!
 //! * `--teleport`            open the teleport window at start
 //! * `--tenx` doodads: read from `--world-spawn-dir` (default the test World's `Data/Worlds/<world>`), saved whole into
-//!   `--doodad-overlay` (default `C:/Games/aadev/doodad-overlay/<world>`); NPCs: native zone spawners, `--spawner-overlay`;
+//!   `--doodad-overlay` (default `data/local/doodad-overlay/<world>`); NPCs: native zone spawners, `--spawner-overlay`;
 //!   map doodads of the cells' `doodad.g` (what the World plants), saved to `--level-doodad-overlay`
-//!   (default `C:/Games/aadev/level-doodad-overlay`)
+//!   (default `data/local/level-doodad-overlay`)
 //! * `--path-dir <dir>`      the server's `Data/Path` folder of AI routes ([`paths`]; default: next to the spawn folder)
 //! * `--switch-world <name>` check: switch to that world (restart) once running
 //! * `--housing <area id>`   start in Housing mode with the zone of that `housing_areas` id selected ([`housing`]);
@@ -210,8 +210,8 @@ fn vec_arg(name: &str) -> Option<Vec<f32>> {
 
 fn main() {
     let world = arg("--world").unwrap_or_else(|| "main_world".into());
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let overlay = arg("--overlay").map(PathBuf::from).unwrap_or_else(|| if flag("--tenx"){PathBuf::from("C:/Games/aadev/overlay")}else{root.join("data/local/editor/overlay")});
+    let root = std::env::current_dir().unwrap_or_default();
+    let overlay = arg("--overlay").map(PathBuf::from).unwrap_or_else(|| if flag("--tenx"){PathBuf::from("data/local/overlay")}else{root.join("data/local/editor/overlay")});
     if let Err(e) = std::fs::create_dir_all(&overlay) {
         eprintln!("cannot create overlay folder {}: {e}", overlay.display());
     }
@@ -228,20 +228,20 @@ fn main() {
 
     let spawn_dir = arg("--spawn-dir")
         .map(PathBuf::from)
-        .unwrap_or_else(|| PathBuf::from(format!("{}/{world}",if flag("--tenx"){"C:/Games/aadev/test-data/Worlds"}else{"D:/aaemu-wt/bevy/rust/crates/aaemu-game/app/Data/Worlds"})));
+        .unwrap_or_else(|| PathBuf::from(format!("{}/{world}",if flag("--tenx"){"data/local/test-data/Worlds"}else{"server/Data/Worlds"})));
     let mut mirrors: Vec<PathBuf> = args("--mirror").into_iter().map(PathBuf::from).collect();
     if !flag("--tenx") && mirrors.is_empty() && arg("--spawn-dir").is_none() {
-        let runtime = PathBuf::from(format!("D:/aaemu-live-bevy/rs-game/Data/Worlds/{world}"));
+        let runtime = PathBuf::from(format!("server/Data/Worlds/{world}"));
         if runtime.is_dir() {
             mirrors.push(runtime);
         }
     }
-    let db_path = arg("--db").map(PathBuf::from).unwrap_or_else(|| PathBuf::from(if flag("--tenx"){"C:/Games/aadev/test-data/compact.sqlite3"}else{"D:/aaemu-live-bevy/rs-game/Data/compact.sqlite3"}));
+    let db_path = arg("--db").map(PathBuf::from).unwrap_or_else(|| PathBuf::from(if flag("--tenx"){"data/local/test-data/compact.sqlite3"}else{"server/Data/compact.sqlite3"}));
 
     // 10.x: doodads come from the test World's spawn files, saved edits from the doodad overlay.
-    let doodad_overlay = arg("--doodad-overlay").map(PathBuf::from).unwrap_or_else(|| PathBuf::from(format!("C:/Games/aadev/doodad-overlay/{world}")));
+    let doodad_overlay = arg("--doodad-overlay").map(PathBuf::from).unwrap_or_else(|| PathBuf::from(format!("data/local/doodad-overlay/{world}")));
     let loaded = if flag("--tenx") {
-        let base = arg("--world-spawn-dir").map(PathBuf::from).unwrap_or_else(|| PathBuf::from(format!("C:/Games/aadev/server/game/Data/Worlds/{world}")));
+        let base = arg("--world-spawn-dir").map(PathBuf::from).unwrap_or_else(|| PathBuf::from(format!("data/local/server/game/Data/Worlds/{world}")));
         SpawnStore::load_layered(&base, &doodad_overlay)
     } else {
         SpawnStore::load(&spawn_dir)
@@ -251,11 +251,11 @@ fn main() {
         SpawnStore::empty(if flag("--tenx") { &doodad_overlay } else { &spawn_dir })
     });
     if flag("--tenx") {
-        let spawners = arg("--spawner-overlay").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("C:/Games/aadev/spawner-overlay"));
+        let spawners = arg("--spawner-overlay").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("data/local/spawner-overlay"));
         if let Err(e) = store.load_native(&world, &spawners, &db_path) {
             eprintln!("native NPC spawners unavailable for {world}: {e:#}");
         }
-        let level = arg("--level-doodad-overlay").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("C:/Games/aadev/level-doodad-overlay"));
+        let level = arg("--level-doodad-overlay").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("data/local/level-doodad-overlay"));
         let base = arg("--spawner-base").map(PathBuf::from);
         if let Err(e) = store.load_level(&world, &level, base.as_deref()) {
             eprintln!("level-pack doodads unavailable for {world}: {e:#}");
