@@ -1,0 +1,18 @@
+[package]
+name = "aa-cell10-probe"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+aa-pak.workspace = true
+aa-world.workspace = true
+bevy.workspace = true
+anyhow.workspace = true
+serde_json = "1"
+sha2 = "0.10"
+
+spade = "2"
+
+serde = { version = "1", features = ["derive"] }
+roxmltree = "0.21"

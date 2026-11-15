@@ -1,0 +1,14 @@
+# AA Map Editor 10.x settings. Lines are key = value. Paths may use / or \.
+
+# Your ArcheAge 10.x client folder (the one that contains game_pak). Required.
+client_folder = C:\ArcheAge
+
+# The compact.sqlite3 of your AAEmu server (AAEmu.World ... \Data\compact.sqlite3). Required.
+# The editor only reads it.
+database = C:\AAEmu\Data\compact.sqlite3
+
+# Optional: your AAEmu server's Data\Worlds folder (to show and edit doodad spawns).
+server_worlds =
+
+# Where your edits are saved. Relative paths are next to this file.
+save_folder = saves
